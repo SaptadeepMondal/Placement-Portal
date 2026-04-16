@@ -1,69 +1,70 @@
 # 🎓 Placement Portal
 
-A full-stack web application built with Flask that streamlines campus recruitment by connecting students and companies on a single platform. It enables efficient job application management, candidate tracking, and recruitment workflows.
+> A full-stack campus recruitment platform built with Flask to streamline job applications, candidate management, and hiring workflows between students, companies, and administrators.
 
 ---
 
-## 🚀 Overview
+## 🚀 Live Overview
 
-The Placement Portal is designed to simplify the placement process for students, recruiters, and administrators. It provides a centralized system where:
+The **Placement Portal** digitizes the campus placement process by enabling:
 
-- Students can explore and apply for jobs
-- Companies can manage hiring drives and candidates
-- Admins can control and verify company access
+- 👨‍🎓 Students → apply for jobs & track applications  
+- 🏢 Companies → create drives & manage applicants  
+- 🛠 Admins → approve companies & control platform access  
 
 ---
 
-## ✨ Features
+## ✨ Key Highlights
 
-### 👨‍🎓 Students
-- Register & login
-- Apply to placement drives
-- Upload resume
-- Track application status
-
-### 🏢 Companies
-- Create placement drives
-- View applicants
-- Shortlist / reject / hire candidates
-
-### 🛠 Admin
-- Approve or reject company registrations
+- 🔐 Secure authentication system with role-based access
+- 📄 Resume upload & application tracking system
+- 🏢 Company-driven job posting & hiring workflow
+- 🛠 Admin approval system for company verification
+- ⚡ Lightweight CRUD-based architecture using Flask
 
 ---
 
 ## 🧰 Tech Stack
 
-- **Backend:** Flask (Python)
-- **Database:** SQLite (SQLAlchemy)
-- **Frontend:** HTML, Bootstrap
-- **Auth:** Flask-Login
-- **Security:** Werkzeug hashing
+**Backend:** Flask (Python)  
+**Frontend:** HTML5, Bootstrap  
+**Database:** SQLite (SQLAlchemy ORM)  
+**Authentication:** Flask-Login  
+**Security:** Werkzeug password hashing  
 
 ---
 
-##🔒 Security Features
-- Password hashing using Werkzeug
-- Session-based authentication with Flask-Login
-- Role-based access (Admin / Student / Company)
+## 📸 UI Showcase
+
+### 👨‍🎓 Student Dashboard
+<img src="static/screenshots/student_dashboard.png" width="420"/>
+
+### 🏢 Company Dashboard
+<img src="static/screenshots/company_dashboard.png" width="420"/>
+
+### 🛠 Admin Panel
+<img src="static/screenshots/admin_dashboard.png" width="420"/>
 
 ---
 
-## 📦 Installation & Setup
 
-Follow these steps to run the project locally:
+## 🧠 Problem Solved
+
+Traditional campus placement processes are fragmented and manual.  
+This system centralizes recruitment activities and improves efficiency by:
+
+- Reducing manual coordination between stakeholders  
+- Improving transparency in application tracking  
+- Simplifying recruiter workflow management  
+
+---
+
+## ⚙️ Installation
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/SaptadeepMondal/Placement-Portal.git
-
-# 2. Navigate to the project folder
 cd Placement-Portal
-
-# 3. Install dependencies
 pip install -r requirements.txt
-
-# 4. Run the application
 python app.py
 ```
 
@@ -75,31 +76,30 @@ placement-portal/
 │── app.py
 │── models.py
 │── templates/
+│   ├── admin/
+│   ├── company/
+│   ├── student/
 │── static/
+│   ├── screenshots/
+│   ├── uploads/
 │── requirements.txt
 │── README.md
 ```
 
 ---
 
-## 💡 Future Improvements
-
-- Email notifications for application updates
-- Resume parsing & ranking system
-- Admin analytics dashboard
-- API integration for job listings
-- Deployment (AWS / Heroku / Docker)
-
----
-
-## 🧠 Learnings
-
-Through this project, I gained hands-on experience with:
-- Backend development using Flask
-- Database modeling with SQLAlchemy
-- User authentication and session management
-- Building real-world CRUD applications
-
-More improvements are on the way 🚀
+## 🚀 Future Improvements
+- 📧 Email notifications for application updates
+- 🧠 Resume parsing & AI-based candidate ranking
+- 📊 Admin analytics dashboard
+- 🌐 REST API integration
+- ☁️ Deployment using Docker / AWS
 
 ---
+
+🧑‍💻 Key Learnings
+- Full-stack web development using Flask
+- Database design using SQLAlchemy ORM
+- Role-based authentication systems
+- Real-world CRUD workflow design
+- Structuring scalable web applications

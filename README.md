@@ -14,44 +14,31 @@ The Placement Portal is designed to simplify the placement process for students,
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-### 🛠 Admin Panel
+### 👨‍🎓 Students
+- Register & login
+- Apply to placement drives
+- Upload resume
+- Track application status
+
+### 🏢 Companies
+- Create placement drives
+- View applicants
+- Shortlist / reject / hire candidates
+
+### 🛠 Admin
 - Approve or reject company registrations
-- Maintain platform integrity and authenticity
-
-### 👨‍🎓 Student Dashboard
-- Secure registration and login
-- Browse active placement drives
-- Apply to job opportunities
-- Upload and manage resumes
-- Track application status:
-  - Applied
-  - Shortlisted
-  - Rejected
-  - Placed
-
-### 🏢 Company Dashboard
-- Register and log in securely
-- Create and manage placement drives
-- View and filter student applications
-- Access student profiles and resumes
-- Update candidate status:
-  - Shortlist
-  - Reject
-  - Hire (Placed)
 
 ---
 
 ## 🧰 Tech Stack
 
-| Layer          | Technology                     |
-|----------------|-------------------------------|
-| Backend        | Python (Flask)                |
-| Database       | SQLite (SQLAlchemy ORM)       |
-| Frontend       | HTML, Bootstrap               |
-| Authentication | Flask-Login                   |
-| Security       | Werkzeug Password Hashing     |
+- **Backend:** Flask (Python)
+- **Database:** SQLite (SQLAlchemy)
+- **Frontend:** HTML, Bootstrap
+- **Auth:** Flask-Login
+- **Security:** Werkzeug hashing
 
 ---
 
@@ -68,10 +55,10 @@ Follow these steps to run the project locally:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/SaptadeepMondal/placement-portal.git
+git clone https://github.com/SaptadeepMondal/Placement-Portal.git
 
 # 2. Navigate to the project folder
-cd placement-portal
+cd Placement-Portal
 
 # 3. Install dependencies
 pip install -r requirements.txt
@@ -83,13 +70,15 @@ python app.py
 ---
 
 ## 📁 Project Structure
+```
 placement-portal/
-│── app.py    
+│── app.py
 │── models.py
 │── templates/
 │── static/
 │── requirements.txt
 │── README.md
+```
 
 ---
 

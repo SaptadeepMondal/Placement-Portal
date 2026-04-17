@@ -311,20 +311,21 @@ def create_drive():
     if request.method == "POST":
         drive_name = request.form.get("drive_name")
         title = request.form.get("title")
-        description = request.form.get("description")
-        eligibility = request.form.get("eligibility")
-        salary = request.form.get("salary")
-        location = request.form.get("location")
         deadline_str = request.form.get("deadline")
+
+        if not drive_name or not title or not deadline_str:
+            flash("All fields including deadline are required!", "danger")
+            return redirect(request.url)
+
         deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
 
         job = JobPosition(
             drive_name=drive_name,
             title=title,
-            description=description,
-            eligibility=eligibility,
-            salary=salary,
-            location=location,
+            description=request.form.get("description"),
+            eligibility=request.form.get("eligibility"),
+            salary=request.form.get("salary"),
+            location=request.form.get("location"),
             deadline=deadline,
             status="Pending",
             company_id=current_user.id
@@ -333,7 +334,7 @@ def create_drive():
         db.session.add(job)
         db.session.commit()
 
-        flash("Drive created. Waiting for admin approval.")
+        flash("Drive created!", "success")
         return redirect("/company/dashboard")
 
     return render_template("company/create_drive.html")

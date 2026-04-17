@@ -80,7 +80,7 @@ Create New Placement Drive
 </div>
 
 <div class="col-md-4">
-<label class="form-label">Salary</label>
+<label class="form-label">Package (in LPA)</label>
 <input type="text" name="salary" class="form-control">
 </div>
 
@@ -95,7 +95,7 @@ Create New Placement Drive
 
 <div class="col-md-6">
 <label class="form-label">Application Deadline</label>
-<input type="date" name="deadline" class="form-control">
+<input type="date" name="deadline" class="form-control" required>
 </div>
 
 </div>
@@ -132,7 +132,7 @@ Your Placement Drives
 <thead class="table-light">
 <tr>
 <th>Drive Name</th>
-<th>Package</th>
+<th>Package (in LPA)</th>
 <th>Deadline</th>
 <th>Status</th>
 <th>Applications</th>
@@ -146,7 +146,7 @@ Your Placement Drives
 
 <td>{{ job.drive_name }}</td>
 
-<td>{{ job.package }}</td>
+<td>{{ job.salary }}</td>
 
 <td>{{ job.deadline }}</td>
 

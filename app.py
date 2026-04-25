@@ -106,8 +106,13 @@ def register_student():
             resume=resume_filename
         )
 
-        db.session.add(student)
+    try:
+        db.session.add(job)
         db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong", "danger")
+        return redirect(request.url)
 
         flash("Registration successful. Please login.")
         return redirect("/login")
@@ -135,8 +140,13 @@ def register_company():
             website=website,
             hr_contact=hr_contact
         )
+    try:
         db.session.add(company)
         db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong", "danger")
+        return redirect(request.url)
 
         flash("Registration successful. Please wait for admin approval.")
         return redirect("/login")
@@ -279,8 +289,13 @@ def apply_job(job_id):
         job_id=job_id
     )
 
-    db.session.add(application)
-    db.session.commit()
+    try:
+        db.session.add(application)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong", "danger")
+        return redirect(request.url)
 
     flash("Application submitted successfully!")
     return redirect("/student/dashboard")
@@ -331,8 +346,13 @@ def create_drive():
             company_id=current_user.id
         )
 
-        db.session.add(job)
-        db.session.commit()
+        try:
+            db.session.add(job)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("Something went wrong. Please try again.", "danger")
+            return redirect(request.url)
 
         flash("Drive created!", "success")
         return redirect("/company/dashboard")
@@ -408,6 +428,16 @@ def home():
         elif isinstance(current_user, Company):
             return redirect("/company/dashboard")
     return render_template("home.html")
+
+#MARK:ERROR HANDLERS
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("errors/404.html"), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    db.session.rollback()
+    return render_template("errors/500.html"), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

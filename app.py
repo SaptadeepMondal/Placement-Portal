@@ -107,7 +107,7 @@ def register_student():
         )
 
     try:
-        db.session.add(job)
+        db.session.add(student)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -179,7 +179,7 @@ def admin_dashboard():
 
     return render_template(
         "admin/dashboard.html",
-        total_students=Student.query.count(), # Global counts usually stay the same
+        total_students=Student.query.count(),
         total_companies=Company.query.count(),
         total_jobs=JobPosition.query.count(),
         total_applications=Application.query.count(),

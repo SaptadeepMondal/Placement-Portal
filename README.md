@@ -32,18 +32,6 @@ The **Placement Portal** digitizes the campus placement process by enabling:
 **Authentication:** Flask-Login  
 **Security:** Werkzeug password hashing  
 
----
-
-## 📸 UI Showcase
-
-### 👨‍🎓 Student Dashboard
-<img src="static/screenshots/student_dashboard.png" width="420"/>
-
-### 🏢 Company Dashboard
-<img src="static/screenshots/company_dashboard.png" width="420"/>
-
-### 🛠 Admin Panel
-<img src="static/screenshots/admin_dashboard.png" width="420"/>
 
 ---
 
@@ -60,6 +48,7 @@ This system centralizes recruitment activities and improves efficiency by:
 ---
 
 ## ⚙️ Installation
+
 
 ```bash
 git clone https://github.com/SaptadeepMondal/Placement-Portal.git

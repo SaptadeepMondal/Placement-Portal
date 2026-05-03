@@ -1,9 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
-from flask_login import current_user
-from config import Config
-from models import db, Admin, Student, Company, JobPosition, Application
+import os
+
+from flask import Flask, render_template, redirect, request, flash, session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+
+from config import Config
+from models import db, Admin, Student, Company, JobPosition, Application
 from datetime import datetime
 
 app = Flask(__name__)
@@ -18,7 +21,9 @@ login_manager.login_view = "login"
 # Load user
 @login_manager.user_loader
 def load_user(user_id):
-    role, id = user_id.split("-")
+    if not user_id or "-" not in user_id:
+        return None
+    role, id = user_id.split("-", 1)
 
     if role == "admin":
         return Admin.query.get(int(id))
@@ -86,16 +91,24 @@ def register_student():
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
-        password = generate_password_hash(request.form.get("password"))
         education = request.form.get("education")
         skills = request.form.get("skills")
 
+        if Student.query.filter_by(email=email).first():
+            flash("Email already registered", "danger")
+            return redirect("/register/student")
+
+        password = generate_password_hash(request.form.get("password"))
         resume_file = request.files.get("resume")
         resume_filename = None
 
         if resume_file and resume_file.filename != "":
-            resume_filename = resume_file.filename
-            resume_file.save(f"static/uploads/{resume_filename}")
+            upload_dir = app.config.get("UPLOAD_FOLDER", "static/uploads")
+            os.makedirs(upload_dir, exist_ok=True)
+            resume_filename = secure_filename(resume_file.filename)
+            if not resume_filename:
+                resume_filename = "resume"
+            resume_file.save(os.path.join(upload_dir, resume_filename))
 
         student = Student(
             name=name,
@@ -106,15 +119,15 @@ def register_student():
             resume=resume_filename
         )
 
-    try:
-        db.session.add(student)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        flash("Something went wrong", "danger")
-        return redirect(request.url)
+        try:
+            db.session.add(student)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash("Something went wrong", "danger")
+            return redirect("/register/student")
 
-        flash("Registration successful. Please login.")
+        flash("Registration successful. Please login.", "success")
         return redirect("/login")
 
     return render_template("register_student.html")
@@ -130,7 +143,7 @@ def register_company():
         hr_contact = request.form.get("hr_contact")
 
         if Company.query.filter_by(email=email).first():
-            flash("Email already exists")
+            flash("Email already exists", "warning")
             return redirect("/register/company")
 
         company = Company(
@@ -140,15 +153,16 @@ def register_company():
             website=website,
             hr_contact=hr_contact
         )
-    try:
-        db.session.add(company)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        flash("Something went wrong", "danger")
-        return redirect(request.url)
 
-        flash("Registration successful. Please wait for admin approval.")
+        try:
+            db.session.add(company)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            flash("Something went wrong", "danger")
+            return redirect("/register/company")
+
+        flash("Registration successful. Please wait for admin approval.", "success")
         return redirect("/login")
 
     return render_template("register_company.html")
@@ -332,7 +346,11 @@ def create_drive():
             flash("All fields including deadline are required!", "danger")
             return redirect(request.url)
 
-        deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
+        try:
+            deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Invalid deadline date.", "danger")
+            return redirect(request.url)
 
         job = JobPosition(
             drive_name=drive_name,
@@ -423,9 +441,11 @@ def update_application(app_id, new_status):
 @app.route("/")
 def home():
     if current_user.is_authenticated:
+        if isinstance(current_user, Admin):
+            return redirect("/admin/dashboard")
         if isinstance(current_user, Student):
             return redirect("/student/dashboard")
-        elif isinstance(current_user, Company):
+        if isinstance(current_user, Company):
             return redirect("/company/dashboard")
     return render_template("home.html")
 

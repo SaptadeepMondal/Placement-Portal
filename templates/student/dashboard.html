@@ -1,163 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Placement Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .main-content { margin-left: 0; padding: 2rem; }
+        .stat-card, .custom-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; }
+        .stat-card { transition: transform 0.2s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .table thead { background: #f9fafb; }
+        .table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; color: #6b7280; padding: 1rem; white-space: nowrap; }
+        .table td { padding: 1rem; vertical-align: middle; }
+        .badge { padding: 0.5em 0.8em; border-radius: 6px; font-weight: 500; }
+        .panel-header { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 0.85rem 1rem; }
+        @media (max-width: 991px) { .main-content { padding: 1.25rem; } }
+    </style>
 </head>
-
-<body class="bg-light">
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand">Student Dashboard</span>
-        <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+<body>
+<div class="main-content">
+    <div class="panel-header d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fa-solid fa-user-graduate text-primary me-2 fs-4"></i>
+            <h5 class="mb-0 fw-bold">Student Dashboard</h5>
+        </div>
+        <a href="/logout" class="btn btn-outline-danger btn-sm">
+            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+        </a>
     </div>
-</nav>
 
-<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <p class="text-muted small mb-0">Track jobs and application progress</p>
+        </div>
+    </div>
 
-<!-- FLASH MESSAGES -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} border-0 shadow-sm rounded-3 mb-4">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-<!-- DASHBOARD STATS -->
-<div class="row mb-4">
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-file-circle-check fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Total Applications</h6>
+                <h2 class="fw-bold">{{ applications|length }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="fa-solid fa-user-check fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Shortlisted</h6>
+                <h2 class="fw-bold">{{ applications | selectattr("status","equalto","Shortlisted") | list | length }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-user-xmark fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Rejected</h6>
+                <h2 class="fw-bold">{{ applications | selectattr("status","equalto","Rejected") | list | length }}</h2>
+            </div>
+        </div>
+    </div>
 
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Total Applications</h5>
-<h3 class="text-primary">{{ applications|length }}</h3>
+    <div id="jobs" class="custom-card mb-5 shadow-sm">
+        <div class="p-4 border-bottom"><h5 class="mb-0 fw-bold">Available Jobs</h5></div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Drive</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Deadline</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td>{{ job.drive_name }}</td>
+                        <td>{{ job.company.name }}</td>
+                        <td>{{ job.location or "-" }}</td>
+                        <td>{{ job.deadline }}</td>
+                        <td>
+                            {% if job.id in applied_job_ids %}
+                            <button class="btn btn-sm btn-secondary" disabled>Applied</button>
+                            {% else %}
+                            <a href="/student/apply/{{ job.id }}" class="btn btn-sm btn-success">Apply</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No jobs available right now.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="applications" class="custom-card shadow-sm">
+        <div class="p-4 border-bottom"><h5 class="mb-0 fw-bold">My Applications</h5></div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Drive</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ app.job.drive_name }}</td>
+                        <td>
+                            {% if app.status == "Applied" %}
+                            <span class="badge bg-secondary-subtle text-secondary">Applied</span>
+                            {% elif app.status == "Shortlisted" %}
+                            <span class="badge bg-info-subtle text-info">Shortlisted</span>
+                            {% elif app.status == "Rejected" %}
+                            <span class="badge bg-danger-subtle text-danger">Rejected</span>
+                            {% elif app.status == "Placed" %}
+                            <span class="badge bg-success-subtle text-success">Placed</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark border">{{ app.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2" class="text-center text-muted">No applications yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-</div>
-
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Shortlisted</h5>
-<h3 class="text-success">
-{{ applications | selectattr("status","equalto","Shortlisted") | list | length }}
-</h3>
-</div>
-</div>
-
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Rejected</h5>
-<h3 class="text-danger">
-{{ applications | selectattr("status","equalto","Rejected") | list | length }}
-</h3>
-</div>
-</div>
-
-</div>
-
-<!-- AVAILABLE JOBS -->
-<div class="card shadow-sm mb-4">
-
-<div class="card-header bg-primary text-white">
-Available Jobs
-</div>
-
-<div class="card-body">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-light">
-<tr>
-<th>Drive</th>
-<th>Company</th>
-<th>Location</th>
-<th>Deadline</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for job in jobs %}
-<tr>
-
-<td>{{ job.drive_name }}</td>
-<td>{{ job.company.name }}</td>
-<td>{{ job.location }}</td>
-<td>{{ job.deadline }}</td>
-
-<td>
-{% if job.id in applied_job_ids %}
-<button class="btn btn-sm btn-secondary" disabled>Applied</button>
-{% else %}
-<a href="/student/apply/{{ job.id }}" class="btn btn-sm btn-success">Apply</a>
-{% endif %}
-</td>
-
-</tr>
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-</div>
-
-<!-- MY APPLICATIONS -->
-<div class="card shadow-sm">
-
-<div class="card-header bg-secondary text-white">
-My Applications
-</div>
-
-<div class="card-body">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-light">
-<tr>
-<th>Drive</th>
-<th>Status</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for app in applications %}
-<tr>
-
-<td>{{ app.job.drive_name }}</td>
-
-<td>
-{% if app.status == "Applied" %}
-<span class="badge bg-secondary">Applied</span>
-
-{% elif app.status == "Shortlisted" %}
-<span class="badge bg-info">Shortlisted</span>
-
-{% elif app.status == "Rejected" %}
-<span class="badge bg-danger">Rejected</span>
-
-{% elif app.status == "Placed" %}
-<span class="badge bg-success">Placed</span>
-
-{% endif %}
-</td>
-
-</tr>
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
 </body>
 </html>

@@ -1,180 +1,296 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Placement Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .custom-table-card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .table thead {
+            background: #f9fafb;
+        }
+
+        .table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            padding: 1rem;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .search-container .form-control {
+            border-radius: 10px;
+            padding-left: 2.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .panel-header {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+        }
+
+        @media (max-width: 991px) {
+            .main-content {
+                padding: 1.25rem;
+            }
+        }
+    </style>
 </head>
-
-<body class="bg-light">
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">Admin Dashboard</span>
-        <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+<body>
+<div class="main-content">
+    <div class="panel-header d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fa-solid fa-shield-halved text-primary me-2 fs-4"></i>
+            <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
+        </div>
+        <a href="/logout" class="btn btn-outline-danger btn-sm">
+            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+        </a>
     </div>
-</nav>
 
-<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <p class="text-muted small mb-0">Welcome back, Admin</p>
+        </div>
+        <div class="search-container position-relative" style="min-width: 260px; max-width: 360px; width: 100%;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <form method="GET" action="/admin/dashboard">
+                <input type="text" name="search" class="form-control" placeholder="Quick search..." value="{{ request.args.get('search', '') }}">
+            </form>
+        </div>
+    </div>
 
-    <!-- FLASH MESSAGES -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }}">{{ message }}</div>
+                <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'primary' }} border-0 shadow-sm rounded-3 mb-4">{{ message }}</div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <!-- STATS CARDS -->
-    <div class="row text-center mb-4">
+    {% set pending_companies = companies | selectattr("is_approved", "equalto", False) | list %}
+    {% set blocked_students = students | selectattr("is_active", "equalto", False) | list %}
+    {% set active_drives = jobs | selectattr("status", "equalto", "Approved") | list %}
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h5>Total Students</h5>
-                <h3 class="text-primary">{{ total_students }}</h3>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                    <i class="fa-solid fa-building-circle-exclamation fs-4"></i>
+                </div>
+                <h6 class="text-muted fw-normal">Pending Companies</h6>
+                <h2 class="fw-bold">{{ pending_companies | length }}</h2>
+                {% if pending_companies %}
+                    <div class="mt-3">
+                        {% for company in pending_companies[:2] %}
+                            <div class="small py-1 border-bottom d-flex justify-content-between">
+                                <span>{{ company.name }}</span>
+                                <a href="/admin/approve_company/{{ company.id }}" class="text-success text-decoration-none">Approve</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h5>Total Companies</h5>
-                <h3 class="text-success">{{ total_companies }}</h3>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="fa-solid fa-calendar-check fs-4"></i>
+                </div>
+                <h6 class="text-muted fw-normal">Active Drives</h6>
+                <h2 class="fw-bold">{{ active_drives | length }}</h2>
+                <p class="small text-muted mb-0">Across {{ companies | length }} partners</p>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h5>Total Drives</h5>
-                <h3 class="text-warning">{{ total_jobs }}</h3>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                    <i class="fa-solid fa-user-slash fs-4"></i>
+                </div>
+                <h6 class="text-muted fw-normal">Blacklisted Students</h6>
+                <h2 class="fw-bold">{{ blocked_students | length }}</h2>
+                <p class="small text-muted mb-0">Restricted from applying</p>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm p-3">
-                <h5>Total Applications</h5>
-                <h3 class="text-danger">{{ total_applications }}</h3>
-            </div>
-        </div>
-
     </div>
 
-    <!-- SEARCH -->
-    <form action="/admin/dashboard" method="GET" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="search" class="form-control" placeholder="Search students by name or companies by name" value="{{ request.args.get('search', '') }}">
-        <button type="submit" class="btn btn-primary">Search</button>
-        <a href="/admin/dashboard" class="btn btn-outline-secondary">Clear</a>
-    </div>
-    </form>
-
-    <!-- COMPANIES SECTION -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-success text-white">
-            Registered Companies
+    <div id="companies" class="custom-table-card mb-5 shadow-sm">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Company Directory</h5>
+            <a href="/admin/dashboard" class="btn btn-sm btn-outline-secondary">Refresh</a>
         </div>
-        <div class="card-body">
-
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Approved</th>
+                        <th>Company</th>
                         <th>Status</th>
+                        <th>Account</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-
-                {% for company in companies %}
-                <tr>
-                    <td>{{ company.name }}</td>
-                    <td>{{ company.email }}</td>
-                    <td>
-                        {% if company.is_approved %}
-                            <span class="badge bg-success">Approved</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if company.is_active %}
-                            <span class="badge bg-primary">Active</span>
-                        {% else %}
-                            <span class="badge bg-danger">Blacklisted</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if not company.is_approved %}
-                            <a href="/admin/approve_company/{{ company.id }}" class="btn btn-success btn-sm">
-                                Approve
-                            </a>
-                        {% endif %}
-
-                        {% if company.is_active %}
-                            <a href="/admin/blacklist/company/{{ company.id }}" class="btn btn-danger btn-sm">
-                                Blacklist
-                            </a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-
+                    {% for company in companies %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ company.name }}</div>
+                                <div class="small text-muted">{{ company.email }}</div>
+                            </td>
+                            <td>
+                                {% if company.is_approved %}
+                                    <span class="badge bg-success-subtle text-success">Approved</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if company.is_active %}
+                                    <span class="text-primary small"><i class="fa-solid fa-circle-check"></i> Active</span>
+                                {% else %}
+                                    <span class="text-danger small"><i class="fa-solid fa-circle-xmark"></i> Blacklisted</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not company.is_approved %}
+                                    <a href="/admin/approve_company/{{ company.id }}" class="btn btn-sm btn-success">Approve</a>
+                                {% endif %}
+                                {% if company.is_active %}
+                                    <a href="/admin/blacklist/company/{{ company.id }}" class="btn btn-sm btn-outline-danger ms-2">Blacklist</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No companies found.</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-
         </div>
     </div>
 
-    <!-- STUDENT SECTION -->
-    <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white">Registered Students</div>
-    <div class="card-body">
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Education</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.email }}</td>
-                    <td>{{ student.education }}</td>
-                    <td>
-                        {% if student.is_active %}
-                            <span class="badge bg-success">Active</span>
-                        {% else %}
-                            <span class="badge bg-danger">Blacklisted</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if student.is_active %}
-                            <a href="/admin/blacklist/student/{{ student.id }}" class="btn btn-danger btn-sm">Blacklist</a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    </div>
-
-    <!-- JOB DRIVES SECTION -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-warning">
-            Placement Drives
+    <div id="students" class="custom-table-card mb-5 shadow-sm">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Student Registry</h5>
+            <span class="text-muted small">{{ students | length }} total</span>
         </div>
-        <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Education</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ student.name }}</div>
+                                <div class="small text-muted">{{ student.email }}</div>
+                            </td>
+                            <td>{{ student.education or "Not provided" }}</td>
+                            <td>
+                                {% if student.is_active %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Blacklisted</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if student.is_active %}
+                                    <a href="/admin/blacklist/student/{{ student.id }}" class="btn btn-sm btn-outline-danger">Blacklist</a>
+                                {% else %}
+                                    <span class="small text-muted">No actions</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No students found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
+    <div id="drives" class="custom-table-card shadow-sm">
+        <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Placement Drives</h5>
+            <span class="text-muted small">{{ jobs | length }} total</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
                     <tr>
                         <th>Drive</th>
                         <th>Company</th>
@@ -183,42 +299,41 @@
                     </tr>
                 </thead>
                 <tbody>
-
-                {% for job in jobs %}
-                <tr>
-                    <td>{{ job.drive_name }}</td>
-                    <td>{{ job.company.name }}</td>
-                    <td>
-                        {% if job.status == "Approved" %}
-                            <span class="badge bg-success">Approved</span>
-                        {% elif job.status == "Pending" %}
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        {% elif job.status == "Closed" %}
-                            <span class="badge bg-secondary">Closed</span>
-                        {% else %}
-                            <span class="badge bg-danger">{{ job.status }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if job.status == "Pending" %}
-                            <a href="/admin/approve_drive/{{ job.id }}" class="btn btn-success btn-sm">
-                                Approve
-                            </a>
-                            <a href="/admin/reject_drive/{{ job.id }}" class="btn btn-danger btn-sm">
-                                Reject
-                            </a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-
+                    {% for job in jobs %}
+                        <tr>
+                            <td>{{ job.drive_name }}</td>
+                            <td>{{ job.company.name }}</td>
+                            <td>
+                                {% if job.status == "Approved" %}
+                                    <span class="badge bg-success-subtle text-success">Approved</span>
+                                {% elif job.status == "Pending" %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                                {% elif job.status == "Closed" %}
+                                    <span class="badge bg-secondary-subtle text-secondary">Closed</span>
+                                {% elif job.status == "Rejected" %}
+                                    <span class="badge bg-danger-subtle text-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border">{{ job.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if job.status == "Pending" %}
+                                    <a href="/admin/approve_drive/{{ job.id }}" class="btn btn-sm btn-success">Approve</a>
+                                    <a href="/admin/reject_drive/{{ job.id }}" class="btn btn-sm btn-outline-danger ms-2">Reject</a>
+                                {% else %}
+                                    <span class="small text-muted">No actions</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No drives found.</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-
         </div>
     </div>
-
 </div>
-
 </body>
 </html>

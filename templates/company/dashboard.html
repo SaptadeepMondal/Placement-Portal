@@ -1,190 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Company Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard | Placement Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .main-content { margin-left: 0; padding: 2rem; }
+        .stat-card, .custom-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; }
+        .stat-card { transition: transform 0.2s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .table thead { background: #f9fafb; }
+        .table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; color: #6b7280; padding: 1rem; white-space: nowrap; }
+        .table td { padding: 1rem; vertical-align: middle; }
+        .badge { padding: 0.5em 0.8em; border-radius: 6px; font-weight: 500; }
+        .panel-header { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 0.85rem 1rem; }
+        @media (max-width: 991px) { .main-content { padding: 1.25rem; } }
+    </style>
 </head>
-
-<body class="bg-light">
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand">Company Dashboard</span>
-        <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+<body>
+<div class="main-content">
+    <div class="panel-header d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fa-solid fa-building text-primary me-2 fs-4"></i>
+            <h5 class="mb-0 fw-bold">Company Dashboard</h5>
+        </div>
+        <a href="/logout" class="btn btn-outline-danger btn-sm">
+            <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+        </a>
     </div>
-</nav>
 
-<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <p class="text-muted small mb-0">Manage drives and track applications</p>
+        </div>
+    </div>
 
-<!-- FLASH MESSAGES -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }} border-0 shadow-sm rounded-3 mb-4">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
-<!-- DASHBOARD STATS -->
-<div class="row mb-4">
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-briefcase fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Total Drives</h6>
+                <h2 class="fw-bold">{{ jobs|length }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="fa-solid fa-circle-check fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Active Drives</h6>
+                <h2 class="fw-bold">{{ jobs | selectattr("status","equalto","Approved") | list | length }}</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card p-4 h-100">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-clock fs-4"></i></div>
+                <h6 class="text-muted fw-normal">Pending Approval</h6>
+                <h2 class="fw-bold">{{ jobs | selectattr("status","equalto","Pending") | list | length }}</h2>
+            </div>
+        </div>
+    </div>
 
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Total Drives</h5>
-<h3 class="text-primary">{{ jobs|length }}</h3>
+    <div id="create-drive" class="custom-card mb-5 shadow-sm">
+        <div class="p-4 border-bottom"><h5 class="mb-0 fw-bold">Create New Placement Drive</h5></div>
+        <div class="p-4">
+            <form method="POST" action="/company/create_drive">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Drive Name</label>
+                        <input type="text" name="drive_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Package (in LPA)</label>
+                        <input type="text" name="salary" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Location</label>
+                        <input type="text" name="location" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Application Deadline</label>
+                        <input type="date" name="deadline" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Eligibility</label>
+                    <input type="text" name="eligibility" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Job Description</label>
+                    <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
+                <button class="btn btn-primary">Create Drive</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="drives" class="custom-card shadow-sm">
+        <div class="p-4 border-bottom"><h5 class="mb-0 fw-bold">Your Placement Drives</h5></div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Drive Name</th>
+                        <th>Package (in LPA)</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                        <th>Applications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td>{{ job.drive_name }}</td>
+                        <td>{{ job.salary or "-" }}</td>
+                        <td>{{ job.deadline }}</td>
+                        <td>
+                            {% if job.status == "Approved" %}
+                            <span class="badge bg-success-subtle text-success">Approved</span>
+                            {% elif job.status == "Pending" %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                            {% elif job.status == "Rejected" %}
+                            <span class="badge bg-danger-subtle text-danger">Rejected</span>
+                            {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary">{{ job.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/company/view_applications/{{ job.id }}" class="btn btn-sm btn-outline-primary">View Applications ({{ job.application_count }})</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted">No drives found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-</div>
-
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Active Drives</h5>
-<h3 class="text-success">
-{{ jobs | selectattr("status","equalto","Approved") | list | length }}
-</h3>
-</div>
-</div>
-
-<div class="col-md-4">
-<div class="card shadow-sm p-3 text-center">
-<h5>Pending Approval</h5>
-<h3 class="text-warning">
-{{ jobs | selectattr("status","equalto","Pending") | list | length }}
-</h3>
-</div>
-</div>
-
-</div>
-
-<!-- CREATE NEW DRIVE -->
-<div class="card shadow-sm mb-4">
-
-<div class="card-header bg-primary text-white">
-Create New Placement Drive
-</div>
-
-<div class="card-body">
-
-<form method="POST" action="/company/create_drive">
-
-<div class="row mb-3">
-
-<div class="col-md-4">
-<label class="form-label">Drive Name</label>
-<input type="text" name="drive_name" class="form-control" required>
-</div>
-
-<div class="col-md-4">
-<label class="form-label">Job Title</label>
-<input type="text" name="title" class="form-control" required>
-</div>
-
-<div class="col-md-4">
-<label class="form-label">Package (in LPA)</label>
-<input type="text" name="salary" class="form-control">
-</div>
-
-</div>
-
-<div class="row mb-3">
-
-<div class="col-md-6">
-<label class="form-label">Location</label>
-<input type="text" name="location" class="form-control">
-</div>
-
-<div class="col-md-6">
-<label class="form-label">Application Deadline</label>
-<input type="date" name="deadline" class="form-control" required>
-</div>
-
-</div>
-
-<div class="mb-3">
-<label class="form-label">Eligibility</label>
-<input type="text" name="eligibility" class="form-control">
-</div>
-
-<div class="mb-3">
-<label class="form-label">Job Description</label>
-<textarea name="description" class="form-control"></textarea>
-</div>
-
-<button class="btn btn-success">Create Drive</button>
-
-</form>
-
-</div>
-</div>
-
-<!-- COMPANY DRIVES -->
-
-<div class="card shadow-sm">
-
-<div class="card-header bg-secondary text-white">
-Your Placement Drives
-</div>
-
-<div class="card-body">
-
-<table class="table table-bordered table-hover">
-
-<thead class="table-light">
-<tr>
-<th>Drive Name</th>
-<th>Package (in LPA)</th>
-<th>Deadline</th>
-<th>Status</th>
-<th>Applications</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for job in jobs %}
-<tr>
-
-<td>{{ job.drive_name }}</td>
-
-<td>{{ job.salary }}</td>
-
-<td>{{ job.deadline }}</td>
-
-<td>
-
-{% if job.status == "Approved" %}
-<span class="badge bg-success">Approved</span>
-
-{% elif job.status == "Pending" %}
-<span class="badge bg-warning text-dark">Pending</span>
-
-{% elif job.status == "Rejected" %}
-<span class="badge bg-danger">Rejected</span>
-
-{% else %}
-<span class="badge bg-secondary">{{ job.status }}</span>
-{% endif %}
-
-</td>
-
-<td>
-<a href="/company/view_applications/{{ job.id }}" class="btn btn-sm btn-primary">
-    View Applications ({{ job.application_count }})
-</a>
-</td>
-
-</tr>
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
 </body>
 </html>
